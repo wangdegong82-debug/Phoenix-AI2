@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: phoenix-ai-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: FOOTBALL_DATA_PROVIDER
+        value: demo
+      - key: PHOENIX_TIMEZONE
+        value: Asia/Shanghai
+      - key: OWNER_TOKEN
+        generateValue: true
+      - key: PREMIUM_TOKEN
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: FOOTBALL_DATA_API_KEY
+        sync: false

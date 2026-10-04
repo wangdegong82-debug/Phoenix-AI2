@@ -27,7 +27,7 @@ class MatchInput(BaseModel):
     market_home: float = Field(default=0.5, ge=0, le=1)
     market_draw: float = Field(default=0.25, ge=0, le=1)
     market_away: float = Field(default=0.5, ge=0, le=1)
-    notes: list[str] = []
+    notes: list[str] = Field(default_factory=list)
 
 
 class Prediction(BaseModel):

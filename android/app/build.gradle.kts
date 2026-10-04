@@ -14,6 +14,10 @@ val releaseSigningEnabled =
     !releaseKeyAlias.isNullOrBlank() &&
     !releaseKeyPassword.isNullOrBlank()
 
+val defaultApiBase = (System.getenv("PHOENIX_API_BASE") ?: "")
+    .replace("\\", "\\\\")
+    .replace("\"", "\\\"")
+
 android {
     namespace = "com.phoenix.ai"
     compileSdk = 35
@@ -27,8 +31,9 @@ android {
         applicationId = "com.phoenix.ai"
         minSdk = 26
         targetSdk = 35
-        versionCode = 210002
-        versionName = "2.1.2"
+        versionCode = 220000
+        versionName = "2.2.0"
+        buildConfigField("String", "DEFAULT_API_BASE", "\"$defaultApiBase\"")
     }
 
     buildFeatures {
