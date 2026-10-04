@@ -4,6 +4,16 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val releaseKeystorePath = System.getenv("PHOENIX_KEYSTORE_PATH")
+val releaseStorePassword = System.getenv("PHOENIX_STORE_PASSWORD")
+val releaseKeyAlias = System.getenv("PHOENIX_KEY_ALIAS")
+val releaseKeyPassword = System.getenv("PHOENIX_KEY_PASSWORD")
+val releaseSigningEnabled =
+    !releaseKeystorePath.isNullOrBlank() &&
+    !releaseStorePassword.isNullOrBlank() &&
+    !releaseKeyAlias.isNullOrBlank() &&
+    !releaseKeyPassword.isNullOrBlank()
+
 android {
     namespace = "com.phoenix.ai"
     compileSdk = 35
@@ -12,11 +22,34 @@ android {
         applicationId = "com.phoenix.ai"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "2.0.0-mvp"
+        versionCode = 210000
+        versionName = "2.1.0"
     }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
+    if (releaseSigningEnabled) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(releaseKeystorePath!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            if (releaseSigningEnabled) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
+    }
 }
 
 dependencies {

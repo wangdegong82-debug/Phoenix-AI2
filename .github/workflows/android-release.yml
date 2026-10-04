@@ -1,0 +1,60 @@
+name: android-release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Restore release signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.PHOENIX_RELEASE_KEYSTORE_B64 }}
+        run: |
+          test -n "$KEYSTORE_B64" || {
+            echo "Missing PHOENIX_RELEASE_KEYSTORE_B64 secret"
+            exit 1
+          }
+          echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/phoenix-release.jks"
+          echo "PHOENIX_KEYSTORE_PATH=$RUNNER_TEMP/phoenix-release.jks" >> "$GITHUB_ENV"
+
+      - name: Build signed release APK
+        working-directory: android
+        env:
+          PHOENIX_STORE_PASSWORD: ${{ secrets.PHOENIX_STORE_PASSWORD }}
+          PHOENIX_KEY_ALIAS: ${{ secrets.PHOENIX_KEY_ALIAS }}
+          PHOENIX_KEY_PASSWORD: ${{ secrets.PHOENIX_KEY_PASSWORD }}
+        run: gradle :app:assembleRelease --stacktrace
+
+      - name: Verify APK exists
+        run: |
+          test -f android/app/build/outputs/apk/release/app-release.apk
+          mkdir -p dist
+          cp android/app/build/outputs/apk/release/app-release.apk \
+            "dist/PhoenixAI-${GITHUB_REF_NAME}.apk"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/PhoenixAI-${{ github.ref_name }}.apk
+          generate_release_notes: true
