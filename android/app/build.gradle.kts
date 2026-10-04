@@ -18,12 +18,17 @@ android {
     namespace = "com.phoenix.ai"
     compileSdk = 35
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
     defaultConfig {
         applicationId = "com.phoenix.ai"
         minSdk = 26
         targetSdk = 35
-        versionCode = 210001
-        versionName = "2.1.1"
+        versionCode = 210002
+        versionName = "2.1.2"
     }
 
     buildFeatures {
